@@ -1,6 +1,6 @@
 let grid, nextGrid;
 let columns, rows;
-let cellSize = 3;
+let cellSize = 4;
 let neighbourCoordinates = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]];
 
 function createGrid(columns, rows){
@@ -12,9 +12,9 @@ function createGrid(columns, rows){
 }
 
 function setup() {
-  createCanvas(1000, 500);
-  columns = width / cellSize;
-  rows = height / cellSize;
+  createCanvas(window.innerWidth - 5, window.innerHeight - 5);
+  columns = floor(width / cellSize);
+  rows = floor(height / cellSize);
   grid = createGrid(columns, rows);
 
   for(var i = 0; i < columns; i++){
