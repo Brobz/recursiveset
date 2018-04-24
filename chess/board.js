@@ -7,58 +7,65 @@ let BOARD_LAYOUT = [[10, 8, 9, 11, 12, 9, 8, 10],
                     [1, 1, 1, 1, 1, 1, 1 ,1],
                     [4, 2, 3, 5, 6, 3, 2, 4]];
 
-
 class Board {
   constructor(tileSize) {
     this.tileSize = tileSize;
     this.height = tileSize * 8;
     this.width = tileSize * 8;
-    this.tiles = Array(64);
+    this.tiles = Array(8);
 
-    for(var i = 0; i < 64; i++){
-      if(BOARD_LAYOUT[floor(i / 8)][i % 8] == 0)
-        this.tiles[i] = null;
-      else if(BOARD_LAYOUT[floor(i / 8)][i % 8] == 1)
-        this.tiles[i] = new Pawn([i % 8 * this.tileSize, floor(i / 8) * this.tileSize], this.tileSize);
-      else if(BOARD_LAYOUT[floor(i / 8)][i % 8] == 2)
-        this.tiles[i] = new Knight([i % 8 * this.tileSize, floor(i / 8) * this.tileSize], this.tileSize);
-      else if(BOARD_LAYOUT[floor(i / 8)][i % 8] == 3)
-        this.tiles[i] = new Bishop([i % 8 * this.tileSize, floor(i / 8) * this.tileSize], this.tileSize);
-      else if(BOARD_LAYOUT[floor(i / 8)][i % 8] == 4)
-        this.tiles[i] = new Rook([i % 8 * this.tileSize, floor(i / 8) * this.tileSize], this.tileSize);
-      else if(BOARD_LAYOUT[floor(i / 8)][i % 8] == 5)
-        this.tiles[i] = new Queen([i % 8 * this.tileSize, floor(i / 8) * this.tileSize], this.tileSize);
-      else if(BOARD_LAYOUT[floor(i / 8)][i % 8] == 6)
-        this.tiles[i] = new King([i % 8 * this.tileSize, floor(i / 8) * this.tileSize], this.tileSize);
-        else if(BOARD_LAYOUT[floor(i / 8)][i % 8] == 7)
-          this.tiles[i] = new Pawn([i % 8 * this.tileSize, floor(i / 8) * this.tileSize], this.tileSize, true);
-        else if(BOARD_LAYOUT[floor(i / 8)][i % 8] == 8)
-          this.tiles[i] = new Knight([i % 8 * this.tileSize, floor(i / 8) * this.tileSize], this.tileSize, true);
-        else if(BOARD_LAYOUT[floor(i / 8)][i % 8] == 9)
-          this.tiles[i] = new Bishop([i % 8 * this.tileSize, floor(i / 8) * this.tileSize], this.tileSize, true);
-        else if(BOARD_LAYOUT[floor(i / 8)][i % 8] == 10)
-          this.tiles[i] = new Rook([i % 8 * this.tileSize, floor(i / 8) * this.tileSize], this.tileSize, true);
-        else if(BOARD_LAYOUT[floor(i / 8)][i % 8] == 11)
-          this.tiles[i] = new Queen([i % 8 * this.tileSize, floor(i / 8) * this.tileSize], this.tileSize, true);
-        else if(BOARD_LAYOUT[floor(i / 8)][i % 8] == 12)
-          this.tiles[i] = new King([i % 8 * this.tileSize, floor(i / 8) * this.tileSize], this.tileSize, true);
+    for(var i = 0; i < 8; i++){
+      this.tiles[i] = Array(8);
+    }
+
+    for(var i = 0; i < 8; i++){
+      for(var j = 0; j < 8; j++){
+        if(BOARD_LAYOUT[j][i] == 0)
+          this.tiles[i][j] = null;
+        else if(BOARD_LAYOUT[j][i] == 1)
+          this.tiles[i][j] = new Pawn([i, j], this.tileSize);
+        else if(BOARD_LAYOUT[j][i] == 2)
+          this.tiles[i][j] = new Knight([i, j], this.tileSize);
+        else if(BOARD_LAYOUT[j][i] == 3)
+          this.tiles[i][j] = new Bishop([i, j], this.tileSize);
+        else if(BOARD_LAYOUT[j][i] == 4)
+          this.tiles[i][j] = new Rook([i, j], this.tileSize);
+        else if(BOARD_LAYOUT[j][i] == 5)
+          this.tiles[i][j] = new Queen([i, j], this.tileSize);
+        else if(BOARD_LAYOUT[j][i] == 6)
+          this.tiles[i][j] = new King([i, j], this.tileSize);
+        else if(BOARD_LAYOUT[j][i] == 7)
+          this.tiles[i][j] = new Pawn([i, j], this.tileSize, true);
+        else if(BOARD_LAYOUT[j][i] == 8)
+          this.tiles[i][j] = new Knight([i, j], this.tileSize, true);
+        else if(BOARD_LAYOUT[j][i] == 9)
+          this.tiles[i][j] = new Bishop([i, j], this.tileSize, true);
+        else if(BOARD_LAYOUT[j][i] == 10)
+          this.tiles[i][j] = new Rook([i, j], this.tileSize, true);
+        else if(BOARD_LAYOUT[j][i] == 11)
+          this.tiles[i][j] = new Queen([i, j], this.tileSize, true);
+        else if(BOARD_LAYOUT[j][i] == 12)
+          this.tiles[i][j] = new King([i, j], this.tileSize, true);
+      }
     }
   }
   draw(){
     fill(0, 255, 0);
     noStroke();
-    for(var i = 0; i < 64; i++){
-      if(floor(i / 8) % 2){
-        if(!(i % 2)){
-          rect( (i % 8) * this.tileSize, (floor(i / 8)) * this.tileSize, this.tileSize, this.tileSize);
-        }
-      }else{
+    for(var i = 0; i < 8; i++){
+      for(var j = 0; j < 8; j++){
         if(i % 2){
-          rect( (i % 8) * this.tileSize, (floor(i / 8)) * this.tileSize, this.tileSize, this.tileSize);
+          if(!(j % 2)){
+            rect(i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
+          }
+        }else{
+          if(j % 2){
+            rect(i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
+          }
         }
+        if(this.tiles[i][j] != null)
+          this.tiles[i][j].draw();
       }
-      if(this.tiles[i] != null)
-        this.tiles[i].draw();
     }
   }
 }
