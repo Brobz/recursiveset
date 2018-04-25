@@ -116,6 +116,17 @@ class Board {
 
     return false;
   }
+  updatePromoters(){
+    for(var i = 0; i < 8; i++){
+      for(var j = 0; j < 8; j+=7){
+        if(this.tiles[i][j] == null)
+          continue;
+        if(this.tiles[i][j].value == 1){
+          this.tiles[i][j] = new Queen([i, j], this.tileSize, this.tiles[i][j].dark);
+        }
+      }
+    }
+  }
   draw(){
     fill(0, 255, 0);
     noStroke();

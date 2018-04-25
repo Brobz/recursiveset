@@ -16,15 +16,32 @@ class Piece {
     this.pos = [coords[0] * size, coords[1] * size];
     this.size = size;
     this.dark = dark;
+    this.hasMoved = false;
   }
 
-  makeMove(move, b = board){
+  makeMove(move, b = BOARD){
     // Remove it from previous coord
     b.tiles[this.coords[0]][this.coords[1]] = null;
     // Move the piece's coords
     this.coords = move;
     // Place it on the new coord
     b.tiles[move[0]][move[1]] = this;
+    // Update pieces drawing pos
+    this.pos = [this.coords[0] * BOARD_SIZE, this.coords[1] * BOARD_SIZE];
+    // Change hasMoved
+    if(!this.hasMoved)
+      this.hasMoved = true;
+    // Check for castling
+    if(move.length == 3){
+      // Castling queenside
+      if(move[2]){
+        // Move a rook
+        b.tiles[this.coords[0] - 2][this.coords[1]].makeMove([this.coords[0] + 1, this.coords[1]], b);
+      }else{
+        // Castling kingside, move h rook
+        b.tiles[this.coords[0] + 1][this.coords[1]].makeMove([this.coords[0] - 1, this.coords[1]], b);
+      }
+    }
   }
 
   getLegalMoves(){
@@ -32,8 +49,24 @@ class Piece {
     var moves = this.getMoves();
     var boardCopy;
     for(var i = 0; i < moves.length; i++){
-      boardCopy = board.copy();
+      boardCopy = BOARD.copy(); // Copy current board state
+      // Check for castling move
+      if(moves[i].length == 3){
+        // Check if path towards castling is safe
+        if(moves[i][2])
+          // Move the king one step towards queenside castle, check if safe
+          boardCopy.tiles[this.coords[0]][this.coords[1]].makeMove([this.coords[0] - 1, this.coords[1]], boardCopy);
+        else
+          // Move the king one step towards kingside castle, check if safe
+          boardCopy.tiles[this.coords[0]][this.coords[1]].makeMove([this.coords[0] + 1, this.coords[1]], boardCopy);
+        if(boardCopy.isInCheck(this.dark))
+          continue;
+        else
+          boardCopy = BOARD.copy(); // Re-Copy current board state
+      }
+      // Make the move on the copied board
       boardCopy.tiles[this.coords[0]][this.coords[1]].makeMove(moves[i], boardCopy);
+      // Check if legal
       if(!boardCopy.isInCheck(this.dark))
         legalMoves.push(moves[i]);
     }
@@ -47,7 +80,7 @@ class Pawn extends Piece{
     super(coords, size, dark);
     this.value = 1;
   }
-  getMoves(b = board){
+  getMoves(b = BOARD){
     var moves = [];
     var m = -1;
     if(this.dark)
@@ -97,7 +130,7 @@ class Knight extends Piece{
     super(coords, size, dark);
     this.value = 3;
   }
-  getMoves(b = board){
+  getMoves(b = BOARD){
     var moves = [];
     // Check each of the knight positions
     for(var i = 0; i < KNIGHT_MOVES.length; i++){
@@ -126,7 +159,7 @@ class Bishop extends Piece{
     super(coords, size, dark);
     this.value = 3.5;
   }
-  getMoves(b = board){
+  getMoves(b = BOARD){
     var moves = [];
     // Check each diagonal, untill it hits a piece from he opposite color or leaves the board
     for(var i = 0; i < BISHOP_DIAGONALS.length; i++){
@@ -164,7 +197,7 @@ class Rook extends Piece{
     super(coords, size, dark);
     this.value = 5;
   }
-  getMoves(b = board){
+  getMoves(b = BOARD){
     var moves = [];
     // Check each file, untill it hits a piece from he opposite color or leaves the board
     for(var i = 0; i < ROOK_FILES.length; i++){
@@ -179,6 +212,8 @@ class Rook extends Piece{
               // Or has opposite color piece
               else if(b.tiles[this.coords[0] + ROOK_FILES[i][0] * x][this.coords[1] + ROOK_FILES[i][1] * y].dark != this.dark){
                 moves.push([this.coords[0] + ROOK_FILES[i][0] * x, this.coords[1] + ROOK_FILES[i][1] * y]);
+                break;
+              }else{
                 break;
               }
 
@@ -201,7 +236,7 @@ class Queen extends Piece{
     super(coords, size, dark);
     this.value = 9;
   }
-  getMoves(b = board){
+  getMoves(b = BOARD){
     var moves = [];
     // Check each direction, untill it hits a piece from he opposite color or leaves the board
     for(var i = 0; i < QUEEN_DIRECTIONS.length; i++){
@@ -239,7 +274,7 @@ class King extends Piece{
     super(coords, size, dark);
     this.value = 1000;
   }
-  getMoves(b = board){
+  getMoves(b = BOARD){
     var moves = [];
     // Check each direction, untill it hits a piece from he opposite color or leaves the board
     for(var i = 0; i < QUEEN_DIRECTIONS.length; i++){
@@ -253,6 +288,21 @@ class King extends Piece{
           else if(b.tiles[this.coords[0] + QUEEN_DIRECTIONS[i][0]][this.coords[1] + QUEEN_DIRECTIONS[i][1]].dark != this.dark)
             moves.push([this.coords[0] + QUEEN_DIRECTIONS[i][0], this.coords[1] + QUEEN_DIRECTIONS[i][1]]);
       }
+    }
+
+    // Check for castle availability
+    if(!this.hasMoved){
+      // Kingside
+      if(b.tiles[this.coords[0] + 1][this.coords[1]] == null && b.tiles[this.coords[0] + 2][this.coords[1]] == null
+        && b.tiles[this.coords[0] + 3][this.coords[1]] != null)
+          if(!b.tiles[this.coords[0] + 3][this.coords[1]].hasMoved)
+            moves.push([this.coords[0] + 2, this.coords[1], 0]);
+
+      // Queenside
+      if(b.tiles[this.coords[0] - 1][this.coords[1]] == null && b.tiles[this.coords[0] - 2][this.coords[1]] == null
+         && b.tiles[this.coords[0] - 3][this.coords[1]] == null && b.tiles[this.coords[0] - 4][this.coords[1]] != null)
+          if(!b.tiles[this.coords[0] - 4][this.coords[1]].hasMoved)
+            moves.push([this.coords[0] - 2, this.coords[1], 1]);
     }
     return moves;
   }
