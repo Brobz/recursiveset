@@ -1,14 +1,14 @@
-let BOARD_LAYOUT = [[10, 8, 9, 11, 12, 9, 8, 10],
-                    [7, 7, 7, 7, 7, 7, 7 ,7],
-                    [0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0],
-                    [1, 1, 1, 1, 1, 1, 1 ,1],
-                    [4, 2, 3, 5, 6, 3, 2, 4]];
+let BOARD_LAYOUT = [[10,  8,  9, 11, 12,  9,  8, 10],
+                    [ 7,  7,  7,  7,  7,  7,  7 , 7],
+                    [ 0,  0,  0,  0,  0,  0,  0,  0],
+                    [ 0,  0,  0,  0,  0,  0,  0,  0],
+                    [ 0,  0,  0,  0,  0,  0,  0,  0],
+                    [ 0,  0,  0,  0,  0,  0,  0,  0],
+                    [ 1,  1,  1,  1,  1,  1,  1 , 1],
+                    [ 4,  2,  3,  5,  6,  3,  2,  4]];
 
 class Board {
-  constructor(tileSize) {
+  constructor(tileSize, layout = BOARD_LAYOUT) {
     this.tileSize = tileSize;
     this.height = tileSize * 8;
     this.width = tileSize * 8;
@@ -20,34 +20,101 @@ class Board {
 
     for(var i = 0; i < 8; i++){
       for(var j = 0; j < 8; j++){
-        if(BOARD_LAYOUT[j][i] == 0)
+
+        var dark = false;
+        if(layout[j][i] > 6)
+          dark = true;
+
+        if(layout[j][i] == 0)
           this.tiles[i][j] = null;
-        else if(BOARD_LAYOUT[j][i] == 1)
-          this.tiles[i][j] = new Pawn([i, j], this.tileSize);
-        else if(BOARD_LAYOUT[j][i] == 2)
-          this.tiles[i][j] = new Knight([i, j], this.tileSize);
-        else if(BOARD_LAYOUT[j][i] == 3)
-          this.tiles[i][j] = new Bishop([i, j], this.tileSize);
-        else if(BOARD_LAYOUT[j][i] == 4)
-          this.tiles[i][j] = new Rook([i, j], this.tileSize);
-        else if(BOARD_LAYOUT[j][i] == 5)
-          this.tiles[i][j] = new Queen([i, j], this.tileSize);
-        else if(BOARD_LAYOUT[j][i] == 6)
-          this.tiles[i][j] = new King([i, j], this.tileSize);
-        else if(BOARD_LAYOUT[j][i] == 7)
-          this.tiles[i][j] = new Pawn([i, j], this.tileSize, true);
-        else if(BOARD_LAYOUT[j][i] == 8)
-          this.tiles[i][j] = new Knight([i, j], this.tileSize, true);
-        else if(BOARD_LAYOUT[j][i] == 9)
-          this.tiles[i][j] = new Bishop([i, j], this.tileSize, true);
-        else if(BOARD_LAYOUT[j][i] == 10)
-          this.tiles[i][j] = new Rook([i, j], this.tileSize, true);
-        else if(BOARD_LAYOUT[j][i] == 11)
-          this.tiles[i][j] = new Queen([i, j], this.tileSize, true);
-        else if(BOARD_LAYOUT[j][i] == 12)
-          this.tiles[i][j] = new King([i, j], this.tileSize, true);
+        else if(layout[j][i] == 6 || layout[j][i] == 12)
+          this.tiles[i][j] = new King([i, j], this.tileSize, dark);
+        else if(layout[j][i] % 6 < 2)
+          this.tiles[i][j] = new Pawn([i, j], this.tileSize, dark);
+        else if(layout[j][i] % 6 == 2)
+          this.tiles[i][j] = new Knight([i, j], this.tileSize, dark);
+        else if(layout[j][i] % 6 == 3)
+          this.tiles[i][j] = new Bishop([i, j], this.tileSize, dark);
+        else if(layout[j][i] % 6 == 4)
+          this.tiles[i][j] = new Rook([i, j], this.tileSize, dark);
+        else if(layout[j][i] % 6 == 5)
+          this.tiles[i][j] = new Queen([i, j], this.tileSize, dark);
       }
     }
+  }
+
+  copy(){
+    var copyLayout = [[], [], [], [], [], [], [], []];
+    for(var i = 0; i < 8; i++){
+      for(var j = 0; j < 8; j++){
+        if(this.tiles[i][j] == null){
+          copyLayout[j][i] = 0;
+        }
+        else if(this.tiles[i][j].value == 1){
+          if(this.tiles[i][j].dark)
+            copyLayout[j][i] = 7;
+          else
+            copyLayout[j][i] = 1;
+        }
+
+        else if(this.tiles[i][j].value == 3){
+          if(this.tiles[i][j].dark)
+            copyLayout[j][i] = 8;
+          else
+            copyLayout[j][i] = 2;
+        }
+
+        else if(this.tiles[i][j].value == 3.5){
+          if(this.tiles[i][j].dark)
+            copyLayout[j][i] = 9;
+          else
+            copyLayout[j][i] = 3;
+        }
+
+        else if(this.tiles[i][j].value == 5){
+          if(this.tiles[i][j].dark)
+            copyLayout[j][i] = 10;
+          else
+            copyLayout[j][i] = 4;
+        }
+
+        else if(this.tiles[i][j].value == 9){
+          if(this.tiles[i][j].dark)
+            copyLayout[j][i] = 11;
+          else
+            copyLayout[j][i] = 5;
+        }
+
+        else if(this.tiles[i][j].value == 1000){
+          if(this.tiles[i][j].dark)
+            copyLayout[j][i] = 12;
+          else
+            copyLayout[j][i] = 6;
+        }
+
+      }
+    }
+    return new Board(this.tileSize, copyLayout);
+
+  }
+  isInCheck(dark = false){
+    for(var i = 0; i < 8; i++){
+      for(var j = 0; j < 8; j++){
+        if(this.tiles[i][j] == null)
+          continue;
+        if(this.tiles[i][j].dark != dark && this.tiles[i][j].value != 1000){
+          var moves = this.tiles[i][j].getMoves(this);
+          for(var k = 0; k < moves.length; k++){
+            if(this.tiles[moves[k][0]][moves[k][1]] == null)
+              continue;
+            if(this.tiles[moves[k][0]][moves[k][1]].value == 1000 && this.tiles[moves[k][0]][moves[k][1]].dark == dark)
+              return true;
+          }
+        }
+      }
+    }
+
+    return false;
   }
   draw(){
     fill(0, 255, 0);
@@ -63,9 +130,16 @@ class Board {
             rect(i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
           }
         }
+      }
+    }
+
+
+    for(var i = 0; i < 8; i++){
+      for(var j = 0; j < 8; j++){
         if(this.tiles[i][j] != null)
           this.tiles[i][j].draw();
       }
     }
+
   }
 }

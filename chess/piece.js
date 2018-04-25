@@ -17,6 +17,29 @@ class Piece {
     this.size = size;
     this.dark = dark;
   }
+
+  makeMove(move, b = board){
+    // Remove it from previous coord
+    b.tiles[this.coords[0]][this.coords[1]] = null;
+    // Move the piece's coords
+    this.coords = move;
+    // Place it on the new coord
+    b.tiles[move[0]][move[1]] = this;
+  }
+
+  getLegalMoves(){
+    var legalMoves = [];
+    var moves = this.getMoves();
+    var boardCopy;
+    for(var i = 0; i < moves.length; i++){
+      boardCopy = board.copy();
+      boardCopy.tiles[this.coords[0]][this.coords[1]].makeMove(moves[i], boardCopy);
+      if(!boardCopy.isInCheck(this.dark))
+        legalMoves.push(moves[i]);
+    }
+
+    return legalMoves;
+  }
 }
 
 class Pawn extends Piece{
@@ -24,36 +47,36 @@ class Pawn extends Piece{
     super(coords, size, dark);
     this.value = 1;
   }
-  getLegalMoves(){
+  getMoves(b = board){
     var moves = [];
     var m = -1;
     if(this.dark)
       m *= -1;
     // Check if it can move forward
     if((this.coords[1] != 7 && !this.dark) || (this.coords[1] != 0 && this.dark)){
-      if(board.tiles[this.coords[0]][this.coords[1] + m] == null){
+      if(b.tiles[this.coords[0]][this.coords[1] + m] == null){
         moves.push([this.coords[0], this.coords[1] + m]);
       }
     }
 
     // If it can, and it is still on the second or seventh rank, check if it can double move forward
     if(moves.length && (this.coords[1] == 1 || this.coords[1] == 6)){
-      if(board.tiles[this.coords[0]][this.coords[1] + m * 2] == null){
+      if(b.tiles[this.coords[0]][this.coords[1] + m * 2] == null){
         moves.push([this.coords[0], this.coords[1] + m * 2]);
       }
     }
 
     // Check if it can capture on either diagonal
     if(this.coords[0] != 7){
-      if(board.tiles[this.coords[0] + 1][this.coords[1] + m] != null){
-        if(board.tiles[this.coords[0] + 1][this.coords[1] + m].dark != this.dark){
+      if(b.tiles[this.coords[0] + 1][this.coords[1] + m] != null){
+        if(b.tiles[this.coords[0] + 1][this.coords[1] + m].dark != this.dark){
           moves.push([this.coords[0] + 1, this.coords[1] + m]);
         }
       }
     }
     if(this.coords[0] != 0){
-      if(board.tiles[this.coords[0] - 1][this.coords[1] + m] != null){
-        if(board.tiles[this.coords[0] - 1][this.coords[1] + m].dark != this.dark){
+      if(b.tiles[this.coords[0] - 1][this.coords[1] + m] != null){
+        if(b.tiles[this.coords[0] - 1][this.coords[1] + m].dark != this.dark){
           moves.push([this.coords[0] - 1, this.coords[1] + m]);
         }
       }
@@ -74,7 +97,7 @@ class Knight extends Piece{
     super(coords, size, dark);
     this.value = 3;
   }
-  getLegalMoves(){
+  getMoves(b = board){
     var moves = [];
     // Check each of the knight positions
     for(var i = 0; i < KNIGHT_MOVES.length; i++){
@@ -83,9 +106,9 @@ class Knight extends Piece{
         || this.coords[1] + KNIGHT_MOVES[i][1] > 7 || this.coords[1] + KNIGHT_MOVES[i][1] < 0)
         continue;
 
-      if(board.tiles[this.coords[0] + KNIGHT_MOVES[i][0]][this.coords[1] + KNIGHT_MOVES[i][1]] == null)
+      if(b.tiles[this.coords[0] + KNIGHT_MOVES[i][0]][this.coords[1] + KNIGHT_MOVES[i][1]] == null)
         moves.push([this.coords[0] + KNIGHT_MOVES[i][0], this.coords[1] + KNIGHT_MOVES[i][1]]);
-      else if(board.tiles[this.coords[0] + KNIGHT_MOVES[i][0]][this.coords[1] + KNIGHT_MOVES[i][1]].dark != this.dark)
+      else if(b.tiles[this.coords[0] + KNIGHT_MOVES[i][0]][this.coords[1] + KNIGHT_MOVES[i][1]].dark != this.dark)
         moves.push([this.coords[0] + KNIGHT_MOVES[i][0], this.coords[1] + KNIGHT_MOVES[i][1]]);
 
     }
@@ -103,7 +126,7 @@ class Bishop extends Piece{
     super(coords, size, dark);
     this.value = 3.5;
   }
-  getLegalMoves(){
+  getMoves(b = board){
     var moves = [];
     // Check each diagonal, untill it hits a piece from he opposite color or leaves the board
     for(var i = 0; i < BISHOP_DIAGONALS.length; i++){
@@ -112,11 +135,11 @@ class Bishop extends Piece{
       while(this.coords[0] + BISHOP_DIAGONALS[i][0] * x < 8 && this.coords[0] + BISHOP_DIAGONALS[i][0] * x > -1
             && this.coords[1] + BISHOP_DIAGONALS[i][1] * y < 8 && this.coords[1] + BISHOP_DIAGONALS[i][1] * y > -1){
               // In the board, check if square is empty
-              if(board.tiles[this.coords[0] + BISHOP_DIAGONALS[i][0] * x][this.coords[1] + BISHOP_DIAGONALS[i][1] * y]  == null){
+              if(b.tiles[this.coords[0] + BISHOP_DIAGONALS[i][0] * x][this.coords[1] + BISHOP_DIAGONALS[i][1] * y]  == null){
                 moves.push([this.coords[0] + BISHOP_DIAGONALS[i][0] * x, this.coords[1] + BISHOP_DIAGONALS[i][1] * y]);
               }
               // Or has opposite color piece
-              else if(board.tiles[this.coords[0] + BISHOP_DIAGONALS[i][0] * x][this.coords[1] + BISHOP_DIAGONALS[i][1] * y].dark != this.dark){
+              else if(b.tiles[this.coords[0] + BISHOP_DIAGONALS[i][0] * x][this.coords[1] + BISHOP_DIAGONALS[i][1] * y].dark != this.dark){
                 moves.push([this.coords[0] + BISHOP_DIAGONALS[i][0] * x, this.coords[1] + BISHOP_DIAGONALS[i][1] * y]);
                 break;
               }
@@ -141,7 +164,7 @@ class Rook extends Piece{
     super(coords, size, dark);
     this.value = 5;
   }
-  getLegalMoves(){
+  getMoves(b = board){
     var moves = [];
     // Check each file, untill it hits a piece from he opposite color or leaves the board
     for(var i = 0; i < ROOK_FILES.length; i++){
@@ -150,11 +173,11 @@ class Rook extends Piece{
       while(this.coords[0] + ROOK_FILES[i][0] * x < 8 && this.coords[0] + ROOK_FILES[i][0] * x > -1
             && this.coords[1] + ROOK_FILES[i][1] * y < 8 && this.coords[1] + ROOK_FILES[i][1] * y > -1){
               // In the board, check if square is empty
-              if(board.tiles[this.coords[0] + ROOK_FILES[i][0] * x][this.coords[1] + ROOK_FILES[i][1] * y]  == null){
+              if(b.tiles[this.coords[0] + ROOK_FILES[i][0] * x][this.coords[1] + ROOK_FILES[i][1] * y]  == null){
                 moves.push([this.coords[0] + ROOK_FILES[i][0] * x, this.coords[1] + ROOK_FILES[i][1] * y]);
               }
               // Or has opposite color piece
-              else if(board.tiles[this.coords[0] + ROOK_FILES[i][0] * x][this.coords[1] + ROOK_FILES[i][1] * y].dark != this.dark){
+              else if(b.tiles[this.coords[0] + ROOK_FILES[i][0] * x][this.coords[1] + ROOK_FILES[i][1] * y].dark != this.dark){
                 moves.push([this.coords[0] + ROOK_FILES[i][0] * x, this.coords[1] + ROOK_FILES[i][1] * y]);
                 break;
               }
@@ -178,7 +201,7 @@ class Queen extends Piece{
     super(coords, size, dark);
     this.value = 9;
   }
-  getLegalMoves(){
+  getMoves(b = board){
     var moves = [];
     // Check each direction, untill it hits a piece from he opposite color or leaves the board
     for(var i = 0; i < QUEEN_DIRECTIONS.length; i++){
@@ -187,11 +210,11 @@ class Queen extends Piece{
       while(this.coords[0] + QUEEN_DIRECTIONS[i][0] * x < 8 && this.coords[0] + QUEEN_DIRECTIONS[i][0] * x > -1
             && this.coords[1] + QUEEN_DIRECTIONS[i][1] * y < 8 && this.coords[1] + QUEEN_DIRECTIONS[i][1] * y > -1){
               // In the board, check if square is empty
-              if(board.tiles[this.coords[0] + QUEEN_DIRECTIONS[i][0] * x][this.coords[1] + QUEEN_DIRECTIONS[i][1] * y]  == null){
+              if(b.tiles[this.coords[0] + QUEEN_DIRECTIONS[i][0] * x][this.coords[1] + QUEEN_DIRECTIONS[i][1] * y]  == null){
                 moves.push([this.coords[0] + QUEEN_DIRECTIONS[i][0] * x, this.coords[1] + QUEEN_DIRECTIONS[i][1] * y]);
               }
               // Or has opposite color piece
-              else if(board.tiles[this.coords[0] + QUEEN_DIRECTIONS[i][0] * x][this.coords[1] + QUEEN_DIRECTIONS[i][1] * y].dark != this.dark){
+              else if(b.tiles[this.coords[0] + QUEEN_DIRECTIONS[i][0] * x][this.coords[1] + QUEEN_DIRECTIONS[i][1] * y].dark != this.dark){
                 moves.push([this.coords[0] + QUEEN_DIRECTIONS[i][0] * x, this.coords[1] + QUEEN_DIRECTIONS[i][1] * y]);
                 break;
               }
@@ -214,20 +237,20 @@ class Queen extends Piece{
 class King extends Piece{
   constructor(coords, size, dark = false) {
     super(coords, size, dark);
-    this.value = 10000;
+    this.value = 1000;
   }
-  getLegalMoves(){
+  getMoves(b = board){
     var moves = [];
     // Check each direction, untill it hits a piece from he opposite color or leaves the board
     for(var i = 0; i < QUEEN_DIRECTIONS.length; i++){
       if(this.coords[0] + QUEEN_DIRECTIONS[i][0] < 8 && this.coords[0] + QUEEN_DIRECTIONS[i][0] > -1
         && this.coords[1] + QUEEN_DIRECTIONS[i][1] < 8 && this.coords[1] + QUEEN_DIRECTIONS[i][1] > -1){
           // In the board, check if square is empty
-          if(board.tiles[this.coords[0] + QUEEN_DIRECTIONS[i][0]][this.coords[1] + QUEEN_DIRECTIONS[i][1]]  == null)
+          if(b.tiles[this.coords[0] + QUEEN_DIRECTIONS[i][0]][this.coords[1] + QUEEN_DIRECTIONS[i][1]]  == null)
             moves.push([this.coords[0] + QUEEN_DIRECTIONS[i][0], this.coords[1] + QUEEN_DIRECTIONS[i][1]]);
 
           // Or has opposite color piece
-          else if(board.tiles[this.coords[0] + QUEEN_DIRECTIONS[i][0]][this.coords[1] + QUEEN_DIRECTIONS[i][1]].dark != this.dark)
+          else if(b.tiles[this.coords[0] + QUEEN_DIRECTIONS[i][0]][this.coords[1] + QUEEN_DIRECTIONS[i][1]].dark != this.dark)
             moves.push([this.coords[0] + QUEEN_DIRECTIONS[i][0], this.coords[1] + QUEEN_DIRECTIONS[i][1]]);
       }
     }

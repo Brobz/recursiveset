@@ -42,18 +42,24 @@ function draw() {
   if(selectedPiece != null){
     // Make it follow the mouse
     selectedPiece.pos = [mouseX - BOARD_SIZE / 2, mouseY - BOARD_SIZE / 2];
+    // When mouse is released...
     if(!mouseIsPressed){
+      // Get all pieces legal moves
       var moves = selectedPiece.getLegalMoves();
+      // Loop through them
       for(var i = 0; i < moves.length; i++){
+        // If it was placed on a legal moves square
         if(floor(mouseX / BOARD_SIZE) == moves[i][0] && floor(mouseY / BOARD_SIZE) == moves[i][1]){
-          board.tiles[selectedPiece.coords[0]][selectedPiece.coords[1]] = null;
-          selectedPiece.coords = [floor(mouseX / BOARD_SIZE), floor(mouseY / BOARD_SIZE)];
-          board.tiles[floor(mouseX / BOARD_SIZE)][floor(mouseY / BOARD_SIZE)] = selectedPiece;
+          // Move the piece
+          selectedPiece.makeMove(moves[i]);
+          // Switch turns
           turn = !turn;
           break;
         }
       }
+      // Update pieces drawing pos
       selectedPiece.pos = [selectedPiece.coords[0] * BOARD_SIZE, selectedPiece.coords[1] * BOARD_SIZE];
+      // Remove selected piece
       selectedPiece = null;
     }
   }
