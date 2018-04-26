@@ -8,7 +8,7 @@ let BOARD_LAYOUT = [[10,  8,  9, 11, 12,  9,  8, 10],
                     [ 4,  2,  3,  5,  6,  3,  2,  4]];
 
 class Board {
-  constructor(tileSize, layout = BOARD_LAYOUT) {
+  constructor(tileSize, layout = BOARD_LAYOUT, hasMovedLayout = null) {
     this.tileSize = tileSize;
     this.height = tileSize * 8;
     this.width = tileSize * 8;
@@ -25,8 +25,10 @@ class Board {
         if(layout[j][i] > 6)
           dark = true;
 
-        if(layout[j][i] == 0)
+        if(layout[j][i] == 0){
           this.tiles[i][j] = null;
+          continue;
+        }
         else if(layout[j][i] == 6 || layout[j][i] == 12)
           this.tiles[i][j] = new King([i, j], this.tileSize, dark);
         else if(layout[j][i] % 6 < 2)
@@ -39,16 +41,22 @@ class Board {
           this.tiles[i][j] = new Rook([i, j], this.tileSize, dark);
         else if(layout[j][i] % 6 == 5)
           this.tiles[i][j] = new Queen([i, j], this.tileSize, dark);
+
+        if(hasMovedLayout != null){
+          this.tiles[i][j].hasMoved = hasMovedLayout[j][i];
+        }
       }
     }
   }
 
   copy(){
     var copyLayout = [[], [], [], [], [], [], [], []];
+    var hasMovedLayout = [[], [], [], [], [], [], [], []];
     for(var i = 0; i < 8; i++){
       for(var j = 0; j < 8; j++){
         if(this.tiles[i][j] == null){
           copyLayout[j][i] = 0;
+          continue;
         }
         else if(this.tiles[i][j].value == 1){
           if(this.tiles[i][j].dark)
@@ -92,21 +100,28 @@ class Board {
             copyLayout[j][i] = 6;
         }
 
+        hasMovedLayout[j][i] = this.tiles[i][j].hasMoved;
+
       }
     }
-    return new Board(this.tileSize, copyLayout);
+    return new Board(this.tileSize, copyLayout, hasMovedLayout);
 
   }
   isInCheck(dark = false){
     for(var i = 0; i < 8; i++){
       for(var j = 0; j < 8; j++){
+        // Is there a piece on this square?
         if(this.tiles[i][j] == null)
           continue;
+        // Is it from the opposite color, and not the enemy king?
         if(this.tiles[i][j].dark != dark && this.tiles[i][j].value != 1000){
+          // Get its moves
           var moves = this.tiles[i][j].getMoves(this);
           for(var k = 0; k < moves.length; k++){
+            // Is it eyeing anything?
             if(this.tiles[moves[k][0]][moves[k][1]] == null)
               continue;
+            // Is it my king?
             if(this.tiles[moves[k][0]][moves[k][1]].value == 1000 && this.tiles[moves[k][0]][moves[k][1]].dark == dark)
               return true;
           }

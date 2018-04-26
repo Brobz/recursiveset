@@ -42,14 +42,19 @@ class Piece {
         b.tiles[this.coords[0] + 1][this.coords[1]].makeMove([this.coords[0] - 1, this.coords[1]], b);
       }
     }
+
+    // If Im a pawn, check for queening
+    if(this.value == 1){
+      b.updatePromoters();
+    }
   }
 
-  getLegalMoves(){
+  getLegalMoves(b = BOARD){
     var legalMoves = [];
-    var moves = this.getMoves();
+    var moves = this.getMoves(b);
     var boardCopy;
     for(var i = 0; i < moves.length; i++){
-      boardCopy = BOARD.copy(); // Copy current board state
+      boardCopy = b.copy(); // Copy current board state
       // Check for castling move
       if(moves[i].length == 3){
         // Check if path towards castling is safe
@@ -62,7 +67,7 @@ class Piece {
         if(boardCopy.isInCheck(this.dark))
           continue;
         else
-          boardCopy = BOARD.copy(); // Re-Copy current board state
+          boardCopy = b.copy(); // Re-Copy current board state
       }
       // Make the move on the copied board
       boardCopy.tiles[this.coords[0]][this.coords[1]].makeMove(moves[i], boardCopy);
@@ -79,6 +84,14 @@ class Pawn extends Piece{
   constructor(coords, size, dark = false) {
     super(coords, size, dark);
     this.value = 1;
+    this.white_value_table = [   [  0, 0,  0,  0,  0,  0,  0,  0],
+                                 [50, 50, 50, 50, 50, 50, 50 ,50],
+                                 [10, 10, 20, 30, 30, 20, 10, 10],
+                                 [ 5,  5, 10, 25, 25, 10,  5,  5],
+                                 [ 0,  0,  0, 20, 20,  0,  0,  0],
+                                 [ 5, -5,-10,  0,  0,-10, -5,  5],
+                                 [ 5,  10,10,-20,-20,  10,  10 , 5],
+                                 [ 0,  0,  0,  0,  0,  0,  0,  0]];
   }
   getMoves(b = BOARD){
     var moves = [];
@@ -129,6 +142,14 @@ class Knight extends Piece{
   constructor(coords, size, dark = false) {
     super(coords, size, dark);
     this.value = 3;
+    this.white_value_table = [   [-50,-40,-30,-30,-30,-30,-40, -50],
+                                 [-40,-20,  0,  0,  0,  0,-20, -40],
+                                 [-30,  0, 10, 15, 15, 10,  0, -30],
+                                 [-30,  5, 15, 20, 20, 15,  5, -30],
+                                 [-30,  0, 15, 20, 20, 15,  0, -30],
+                                 [-30,  5, 10, 15, 15, 10,  5, -30],
+                                 [-40,-20,10,-20,-20,  10, 10, -40],
+                                 [-50,-40,-30,-30,-30,-30,-40, -50]];
   }
   getMoves(b = BOARD){
     var moves = [];
@@ -158,6 +179,14 @@ class Bishop extends Piece{
   constructor(coords, size, dark = false) {
     super(coords, size, dark);
     this.value = 3.5;
+    this.white_value_table = [   [-20,-40,-30,-30,-30,-30,-40, -20],
+                                 [-10,  0,  0,  0,  0,  0,  0, -10],
+                                 [-10,  0,  5, 10, 10,  5,  0, -10],
+                                 [-10,  5,  5, 10, 10,  5,  5, -10],
+                                 [-10,  0, 10, 10, 10, 10,  0, -10],
+                                 [-10, 10, 10, 10, 10, 10, 10, -10],
+                                 [-10,  5,  0,  0,  0,  0,   5, -10],
+                                 [-20,-40,-30,-30,-30,-30,-40, -20]];
   }
   getMoves(b = BOARD){
     var moves = [];
@@ -176,6 +205,8 @@ class Bishop extends Piece{
                 moves.push([this.coords[0] + BISHOP_DIAGONALS[i][0] * x, this.coords[1] + BISHOP_DIAGONALS[i][1] * y]);
                 break;
               }
+              else
+                break;
 
               x += 1;
               y += 1;
@@ -196,6 +227,14 @@ class Rook extends Piece{
   constructor(coords, size, dark = false) {
     super(coords, size, dark);
     this.value = 5;
+    this.white_value_table = [   [ 0,  0,  0,  0,  0,  0,  0,  0],
+                                 [ 5, 10, 10, 10, 10, 10, 10,  5],
+                                 [-5,  0,  0,  0,  0,  0,  0, -5],
+                                 [-5,  0,  0,  0,  0,  0,  0, -5],
+                                 [-5,  0,  0,  0,  0,  0,  0, -5],
+                                 [-5,  0,  0,  0,  0,  0,  0, -5],
+                                 [-5,  0,  0,  0,  0,  0,  0, -5],
+                                 [ 0,  0,  0,  5,  5,  0,  0,  0]];
   }
   getMoves(b = BOARD){
     var moves = [];
@@ -235,6 +274,14 @@ class Queen extends Piece{
   constructor(coords, size, dark = false) {
     super(coords, size, dark);
     this.value = 9;
+    this.white_value_table = [   [-20,-10,-10,-5,-5,-10,-10, -20],
+                                 [-10,  0,  0,  0,  0, 0, 0, -10],
+                                 [-10,  0,  5,  5,  5, 5, 0, -10],
+                                 [-5,   0,  5,  5,  5, 5, 0, -5],
+                                 [ 0,   0,  5,  5,  5, 5, 0, -5],
+                                 [-10,  5,  5,  5,  5, 5, 0, -10],
+                                 [-10,  0,  5,  0,  0, 0, 0, -10],
+                                 [-20,-10,-10,-5,-5,-10,-10, -20]];
   }
   getMoves(b = BOARD){
     var moves = [];
@@ -253,6 +300,8 @@ class Queen extends Piece{
                 moves.push([this.coords[0] + QUEEN_DIRECTIONS[i][0] * x, this.coords[1] + QUEEN_DIRECTIONS[i][1] * y]);
                 break;
               }
+              else
+                break;
 
               x += 1;
               y += 1;
@@ -273,6 +322,14 @@ class King extends Piece{
   constructor(coords, size, dark = false) {
     super(coords, size, dark);
     this.value = 1000;
+    this.white_value_table = [   [-30,-40,-40,-50,-50,-40,-40,-30],
+                                 [-30,-40,-40,-50,-50,-40,-40,-30],
+                                 [-30,-40,-40,-50,-50,-40,-40,-30],
+                                 [-30,-40,-40,-50,-50,-40,-40,-30],
+                                 [-30,-40,-40,-50,-50,-40,-40,-30],
+                                 [-30,-40,-40,-50,-50,-40,-40,-30],
+                                 [ 20, 20,  0,  0,  0,  0, 20, 20],
+                                 [ 20, 30, 10,  0,  0, 10, 30, 20]];
   }
   getMoves(b = BOARD){
     var moves = [];

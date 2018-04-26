@@ -2,6 +2,7 @@ let BOARD_SIZE = 70; // Witdth and height of each tile
 let BOARD; // Board object, containing all tiles
 let selectedPiece = null; // Piece that the player is moving with the mouse
 let turn = 0; // 0 = White's turn, 1 = Black's turn
+let BLACK_AI; // AI object for the black pieces
 
 function setup() {
   createCanvas(BOARD_SIZE * 8 + 10, BOARD_SIZE * 8 + 10); // Canvas is the size of the board + 10 pixels on wide and tall
@@ -19,6 +20,7 @@ function setup() {
   DARK_KING = loadImage("imgs/dark_king.png"); // . . .
   DARK_IMAGES = [PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING, DARK_PAWN, DARK_KNIGHT, DARK_BISHOP, DARK_ROOK, DARK_QUEEN, DARK_KING];
   BOARD = new Board(BOARD_SIZE); // Initializing board object
+  BLACK_AI = new AI(true, 1, BOARD); // Initializing AI object
 }
 
 function mousePressed(){
@@ -54,7 +56,10 @@ function draw() {
           // Move the piece
           selectedPiece.makeMove(moves[i]);
           // Switch turns
-          turn = !turn;
+          //turn = !turn;
+          var blackAIMove = BLACK_AI.getNextMove();
+          if(blackAIMove != null)
+            BOARD.tiles[blackAIMove.coords[0]][blackAIMove.coords[1]].makeMove(blackAIMove.move);
           break;
         }
       }
@@ -62,11 +67,11 @@ function draw() {
       selectedPiece.pos = [selectedPiece.coords[0] * BOARD_SIZE, selectedPiece.coords[1] * BOARD_SIZE];
       // Remove selected piece
       selectedPiece = null;
+
     }
   }
   push();
   translate(10, 10);
-  BOARD.updatePromoters();
-  BOARD.draw();
+  BLACK_AI.board.draw();
   pop();
 }
