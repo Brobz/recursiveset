@@ -1,3 +1,4 @@
+let running = false;
 let grid, nextGrid;
 let columns, rows;
 let cellSize = 4;
@@ -11,28 +12,17 @@ function createGrid(columns, rows){
   return g;
 }
 
-function setup() {
-  createCanvas(window.innerWidth - 5, window.innerHeight - 5);
-  columns = floor(width / cellSize);
-  rows = floor(height / cellSize);
-  grid = createGrid(columns, rows);
-
-  for(var i = 0; i < columns; i++){
-    for(var j = 0; j < rows; j++){
-      var r = random(1)
-      if(r > 0.85){
-        grid[i][j] = 1;
-      }else{
-        grid[i][j] = 0;
-      }
+function keyPressed() {
+  if (key == ' ')
+    running = !running;
+  if(!running){
+    if(keyCode === RIGHT_ARROW){
+      update();
     }
   }
-
 }
 
-function draw() {
-  background(255);
-  fill(0);
+function update(){
   nextGrid = createGrid(columns, rows);
   for(var i = 0; i < columns; i++){
     for(var j = 0; j < rows; j++){
@@ -60,8 +50,34 @@ function draw() {
       }
     }
   }
-
   grid = nextGrid;
+}
+
+function setup() {
+  createCanvas(window.innerWidth - 5, window.innerHeight - 5);
+  columns = floor(width / cellSize);
+  rows = floor(height / cellSize);
+  grid = createGrid(columns, rows);
+
+  for(var i = 0; i < columns; i++){
+    for(var j = 0; j < rows; j++){
+      var r = random(1)
+      if(r > 0.85){
+        grid[i][j] = 1;
+      }else{
+        grid[i][j] = 0;
+      }
+    }
+  }
+
+}
+
+function draw() {
+  background(255);
+  fill(0);
+  if(running){
+    update();
+  }
 
   for(var i = 0; i < columns; i++){
     for(var j = 0; j < rows; j++){
